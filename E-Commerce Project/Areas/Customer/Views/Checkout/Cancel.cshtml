@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Order Cancelled";
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body text-center p-5">
+
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-danger" style="font-size:80px;"></i>
+                    </div>
+
+                    <h1 class="text-danger fw-bold mb-3">
+                        Payment Cancelled
+                    </h1>
+
+                    <p class="lead text-muted mb-4">
+                        Your payment was cancelled and no charges were completed.
+                    </p>
+
+                    <a asp-area="@CD.CUSTOMER_AREA"
+                       asp-controller="Cart"
+                       asp-action="Index"
+                       class="btn btn-primary btn-lg me-2">
+                        Back To Cart
+                    </a>
+
+                    <a asp-area="@CD.CUSTOMER_AREA"
+                       asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary btn-lg">
+                        Home Page
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

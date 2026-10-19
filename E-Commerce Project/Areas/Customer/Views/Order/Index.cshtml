@@ -1,0 +1,230 @@
+﻿@model E_Commerce_Project.ViewModels.OrderVM
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<!-- Breadcrumb Start -->
+<div class="container-fluid py-3 px-5" style="background:#f8f8fc; border-bottom:1px solid #e9e9f0;">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-0 text-primary">My Orders</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/Customer/Home/Index" class="text-muted text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-secondary">My Orders</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Search Filter -->
+        <form method="get" asp-action="Index" class="d-flex align-items-center gap-2">
+            <div class="d-flex border rounded-pill overflow-hidden" style="max-width:320px;">
+                <input type="text"
+                       name="carrierName"
+                       class="form-control border-0 py-2 ps-3"
+                       placeholder="Search by carrier…"
+                       value="@Context.Request.Query["carrierName"]"
+                       style="min-width:200px;" />
+                <button class="btn btn-primary px-4 rounded-0" type="submit" style="border-radius:0 50px 50px 0 !important;">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            @if (!string.IsNullOrEmpty(Context.Request.Query["carrierName"]))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <i class="fas fa-times me-1"></i> Clear
+                </a>
+            }
+        </form>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+<!-- Orders Section Start -->
+<div class="container-fluid px-5 py-4">
+
+    @if (!Model.Orders.Any())
+    {
+        <!-- Empty State -->
+        <div class="text-center py-5 my-4">
+            <div class="mb-3" style="font-size:4rem; color:#ccc;">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <h5 class="fw-semibold text-secondary">No orders found</h5>
+            <p class="text-muted small">
+                @if (!string.IsNullOrEmpty(Context.Request.Query["carrierName"]))
+                {
+                    <span>No orders match "<strong>@Context.Request.Query["carrierName"]</strong>". Try a different carrier name.</span>
+                }
+                else
+                {
+                    <span>You haven't placed any orders yet.</span>
+                }
+            </p>
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index"
+               class="btn btn-primary rounded-pill px-4 py-2 mt-2">
+                <i class="fas fa-store me-2"></i> Start Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Orders Table Card -->
+        <div class="bg-white rounded shadow-sm overflow-hidden mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background:#f8f8fc; border-bottom:2px solid #e9e9f0;">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Order #</th>
+                            <th class="py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Date</th>
+                            <th class="py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Status</th>
+                            <th class="py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Payment</th>
+                            <th class="py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Carrier</th>
+                            <th class="py-3 text-uppercase small fw-semibold text-secondary" style="letter-spacing:.07em;">Tracking</th>
+                            <th class="py-3 pe-4 text-uppercase small fw-semibold text-secondary text-end" style="letter-spacing:.07em;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr style="border-bottom:1px solid #f0f0f6;">
+                                <!-- Order ID -->
+                                <td class="ps-4 py-3 fw-bold text-dark">#@order.Id</td>
+
+                                <!-- Date -->
+                                <td class="py-3 text-muted small">
+                                    @order.CreatedAt.ToString("MMM dd, yyyy")
+                                </td>
+
+                                <!-- Order Status Badge -->
+                                <td class="py-3">
+                                    @{
+                                        var (orderBg, orderColor, orderFaIcon) = order.OrderStatus switch
+                                        {
+                                            OrderStatus.Pending => ("#fff8e6", "#b45309", "fa-clock"),
+                                            OrderStatus.InProgress => ("#e8f0fe", "#1d4ed8", "fa-sync-alt"),
+                                            OrderStatus.Shipped => ("#ede9fe", "#6d28d9", "fa-truck"),
+                                            OrderStatus.Completed => ("#dcfce7", "#15803d", "fa-check-circle"),
+                                            OrderStatus.Canceled => ("#fee2e2", "#b91c1c", "fa-times-circle"),
+                                            _ => ("#f3f4f6", "#374151", "fa-question-circle")
+                                        };
+                                    }
+                                    <span class="badge d-inline-flex align-items-center gap-1 px-2 py-1"
+                                          style="background:@orderBg; color:@orderColor; border-radius:6px; font-size:.78rem; font-weight:600;">
+                                        <i class="fas @orderFaIcon" style="font-size:.75rem;"></i>
+                                        @order.OrderStatus
+                                    </span>
+                                </td>
+
+                                <!-- Payment -->
+                                <td class="py-3">
+                                    @{
+                                        var (payBg, payColor) = order.PaymentStatus switch
+                                        {
+                                            PaymentStatus.Completed => ("#dcfce7", "#15803d"),
+                                            PaymentStatus.Refunded => ("#fee2e2", "#b91c1c"),
+                                            _ => ("#fff8e6", "#b45309")
+                                        };
+                                    }
+                                    <span class="badge d-block mb-1 px-2 py-1"
+                                          style="background:@payBg; color:@payColor; border-radius:6px; font-size:.78rem; font-weight:600; width:fit-content;">
+                                        @order.PaymentStatus
+                                    </span>
+                                    <span class="text-muted" style="font-size:.72rem;">
+                                        <i class="fas @(order.PaymentMethod == PaymentMethod.Card ? "fa-credit-card" : "fa-money-bill-wave")" style="font-size:.72rem;"></i>
+                                        @order.PaymentMethod
+                                    </span>
+                                </td>
+
+                                <!-- Carrier -->
+                                <td class="py-3 text-muted small">
+                                    @(string.IsNullOrWhiteSpace(order.CarrierName) ? "—" : order.CarrierName)
+                                </td>
+
+                                <!-- Tracking -->
+                                <td class="py-3">
+                                    @if (!string.IsNullOrWhiteSpace(order.TrackingId))
+                                    {
+                                        <span class="badge bg-light text-dark border px-2 py-1"
+                                              style="font-size:.74rem; border-radius:6px; font-family:monospace; letter-spacing:.03em;">
+                                            @order.TrackingId
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+
+                                <!-- Total -->
+                                <td class="py-3 pe-4 text-end fw-bold text-primary" style="font-size:1rem;">
+                                    $@order.TotalPrice.ToString("N2")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Orders pagination">
+                    <ul class="pagination gap-1 mb-0">
+
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-pill border-0 px-3"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage - 1)"
+                               asp-route-carrierName="@Context.Request.Query["carrierName"]"
+                               style="background:#f0f0fb; color:#4f46e5;">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        @for (int p = 1; p <= Model.TotalPages; p++)
+                        {
+                            bool isActive = p == Model.CurrentPage;
+                            <li class="page-item">
+                                <a class="page-link rounded-pill border-0 px-3 fw-semibold"
+                                   asp-action="Index"
+                                   asp-route-page="@p"
+                                   asp-route-carrierName="@Context.Request.Query["carrierName"]"
+                                   style="@(isActive ? "background:var(--bs-primary, #0d6efd); color:#fff;" : "background:#f0f0fb; color:#4f46e5;")">
+                                    @p
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link rounded-pill border-0 px-3"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage + 1)"
+                               asp-route-carrierName="@Context.Request.Query["carrierName"]"
+                               style="background:#f0f0fb; color:#4f46e5;">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+
+</div>
+<!-- Orders Section End -->
+@section Styles {
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: #f8f8fc !important;
+        }
+
+        .page-item.disabled .page-link {
+            opacity: .4;
+            pointer-events: none;
+        }
+    </style>
+}

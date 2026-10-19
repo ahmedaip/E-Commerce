@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Payment Success";
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body text-center p-5">
+
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size:80px;"></i>
+                    </div>
+
+                    <h1 class="text-success fw-bold mb-3">
+                        Payment Successful
+                    </h1>
+
+                    <p class="lead text-muted mb-4">
+                        Thank you for your purchase. Your order has been received and is now being processed.
+                    </p>
+
+                    <a asp-area="@CD.CUSTOMER_AREA"
+                       asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-success btn-lg">
+                        Continue Shopping
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
